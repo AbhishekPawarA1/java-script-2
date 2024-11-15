@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://kit.fontawesome.com/a1a65dd321.js" crossorigin="anonymous"></script>
+    <style>
+    html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background-color: #f0f0f0;
+    }
+    #displaymovies {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 20px;
+        padding: 10px;
+    }
+    #card {
+        background: rgba(255, 255, 255, 0.787);
+        border-radius: 16px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(30px);
+        -webkit-backdrop-filter: blur(30px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 10px;
+    }
+    img {
+        width: 100%;
+        height: 350px;
+        border-radius: 10px;
+    }
+    h1 {
+        text-align: center;
+        animation: colorChange 2s infinite;
+        color: white;
+    }
+    @keyframes colorChange {
+        0% { color: red; }
+        25% { color: blue; }
+        50% { color: green; }
+        75% { color: yellow; }
+        100% { color: purple; }
+    }
+    input {
+        width: 100%;
+        max-width: 400px;
+        height: 25px;
+        font-size: 15px;
+        border-radius: 10px;
+        border: 1px solid black;
+        padding: 10px;
+        margin: auto;
+    }
+    button {
+        background: black;
+        color: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        padding: 10px;
+        cursor: pointer;
+    }
+    button:hover {
+        transform: scale(1.05);
+    }
+    #center {
+        margin: auto;
+        width: 100%;
+        max-width: 400px;
+    }
+    #text-center {
+        text-align: center;
+        margin: auto;
+    }
+    @keyframes borderColorChange {
+        0% { border-color: red; }
+        25% { border-color: blue; }
+        50% { border-color: green; }
+        75% { border-color: yellow; }
+        100% { border-color: purple; }
+    }
+    #moviesearch {
+        padding: 10px;
+        font-size: 20px;
+        border: 2px solid #ccc;
+        border-radius: 4px;
+        animation: borderColorChange 2s infinite;
+    }
+    
+    /* Media Queries */
+    @media (max-width: 768px) {
+        #displaymovies {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        h1 {
+            font-size: 24px;
+        }
+        input {
+            width: 90%;
+        }
+        #center {
+            width: 90%;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        #displaymovies {
+            grid-template-columns: 1fr;
+        }
+        h1 {
+            font-size: 20px;
+        }
+        input {
+            width: 90%;
+        }
+        #center {
+            width: 90%;
+        }
+    }
+    </style>
+    <title>Movies</title>
+</head>
+<body>
+    <div>
+        <h1><i class="fa-solid fa-compact-disc"></i>Movies</h1>
+        <div id="center">
+            <input type="text" id="moviesearch" placeholder="Search Movie" oninput="debouncesearch()">
+        </div>
+        <div id="displaymovies">
+        </div>
+    </div>
+    
+    <script>
+        let apikey="fa843bcb"
+        let searchtimer
+        let searchkeyword=document.querySelector("#moviesearch")
+        searchkeyword.addEventListener("change",debouncesearch)
+
+        function debouncesearch(){
+            console.log("debouncing")
+            clearTimeout(searchtimer);
+            searchtimer=setTimeout(function(){
+                searchmovie()
+            },800)
+        }
+        
+        function searchmovie(){
+            console.log("movie is searching")
+            if(searchkeyword.value.length>=2){
+                fetch(`https://www.omdbapi.com/?apikey=${apikey}&s=${searchkeyword.value}`)
+
+                .then((res) =>res.json())
+                .then((data)=>{
+                    if (data.Response === "True") {
+                        displayonscreen(data.Search); 
+                        console.log(data.Search);
+                    } else {
+                        displayonscreen([]);
+                    }
+                })
+                .catch((error)=>console.log("error in fetching data".error))
+            }
+        }
+
+        let container=document.querySelector("#displaymovies")
+        function displayonscreen(data){
+            console.log(data)
+            container.innerHTML=""
+            if (data.length>0){
+                data.forEach(movie => {
+                let card=document.createElement("div")
+                card.setAttribute("id","card")
+                card.innerHTML=`
+                    <img src="${movie.Poster}" />
+                    <h2>${movie.Title}</h2>
+                    <h3>Type :${movie.Type}</h3>
+                    <h3>Year :${movie.Year}</h3>
+                    <div>
+                        <button>Download</button>
+                    </div>    
+                `;
+                container.appendChild(card)
+            });
+            }
+            else{
+                let card=document.createElement("div")
+                card.setAttribute("id","card")
+                card.innerHTML=`
+                    <h2 id="text-center">No Movie Found</h2>
+                `;
+                container.appendChild(card)
+            }
+        }
+    </script>
+</body>
+</html>
